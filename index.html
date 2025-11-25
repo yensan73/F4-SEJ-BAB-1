@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<title>Kuiz Sejarah – Yen老师｜史神雁</title>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap');
+
+    body {
+        margin: 0;
+        padding: 0;
+        background: #FFF8EE;
+        font-family: 'Nunito', sans-serif;
+    }
+
+    .center-box {
+        max-width: 450px;
+        margin: 40px auto;
+        background: #F9EAC2;
+        border-radius: 18px;
+        padding: 25px;
+        border: 4px solid #3E2A1C;
+        box-shadow: 0 6px 0 #6B4A2B;
+        text-align: center;
+    }
+
+    .logo-large {
+        width: 200px; /* 登录页大图 */
+        margin: 0 auto 20px auto;
+        display: block;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 13px;
+        margin: 10px 0;
+        border-radius: 12px;
+        border: 3px solid #6B4A2B;
+        font-size: 17px;
+    }
+
+    button {
+        width: 100%;
+        padding: 14px;
+        margin-top: 15px;
+        background: #6B4A2B;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 18px;
+        cursor: pointer;
+        box-shadow: 0 4px 0 #3E2A1C;
+    }
+
+    button:hover {
+        background: #3E2A1C;
+    }
+
+    .option {
+        padding: 14px;
+        background: #FFF8EE;
+        margin: 10px 0;
+        border-radius: 12px;
+        cursor: pointer;
+        border: 3px solid #6B4A2B;
+        color: #3E2A1C;
+        font-size: 18px;
+        transition: 0.2s;
+        text-align: left;
+    }
+
+    .option:hover { background: #F4D48C; }
+
+    .correct { background: #D4F8D4 !important; border-color: #2ECC71 !important; }
+    .wrong { background: #FFD6D6 !important; border-color: #E74C3C !important; }
+
+    #nextBtn {
+        display: none;
+        margin-top: 15px;
+    }
+
+    #quizSection, #resultSection, #teacherSection {
+        display: none;
+    }
+
+    #recordList table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+
+    #recordList th, #recordList td {
+        border: 1px solid #3E2A1C;
+        padding: 4px 6px;
+        text-align: left;
+    }
+
+    #recordList th {
+        background: #F4D48C;
+    }
+</style>
+</head>
+
+<body>
+
+<!-- =======================
+     LOGIN SECTION
+======================= -->
+<div id="loginSection" class="center-box">
+    <img id="logoLogin" class="logo-large" src="">
+    <h2 style="color:#3E2A1C; font-weight:800;">Selamat Datang ke Kuiz Sejarah</h2>
+    <h3 style="color:#3E2A1C;">Yen老师｜史神雁 SEJARAH学堂</h3>
+
+    <input id="studentName" type="text" placeholder="Nama Pelajar">
+
+    <select id="studentCenter">
+        <option value="">Pilih Pusat</option>
+        <option value="英皇">英皇</option>
+        <option value="万科">万科</option>
+        <option value="辉煌">辉煌</option>
+    </select>
+
+    <button onclick="startQuiz()">Mulakan Kuiz</button>
+</div>
+
+<!-- =======================
+     QUIZ SECTION
+======================= -->
+<div id="quizSection" class="center-box">
+    <img id="logoSmall" style="width:110px; margin-bottom:15px;" src="">
+
+    <div id="hpBox" style="font-size:28px; color:#E74C3C;">❤️❤️❤️</div>
+
+    <div id="progress"
+         style="width:100%; height:18px; background:#FFF1D6; border-radius:10px;
+         border:3px solid #6B4A2B; overflow:hidden; margin-bottom:15px;">
+        <div id="bar" style="width:0%; height:100%; background:#6B4A2B;"></div>
+    </div>
+
+    <div id="questionBox"
+         style="font-size:20px; font-weight:700; color:#3E2A1C; text-align:left; margin-bottom:10px;"></div>
+
+    <div id="optionsBox"></div>
+
+    <button id="nextBtn" onclick="nextQuestion()">Soalan Seterusnya ➜</button>
+</div>
+
+<!-- =======================
+     RESULT SECTION
+======================= -->
+<div id="resultSection" class="center-box">
+    <img id="logoResult" style="width:150px; margin-bottom:20px;" src="">
+    <h2 style="color:#3E2A1C;">🎉 Tahniah! Kuiz Tamat!</h2>
+    <h3 id="scoreText" style="color:#6B4A2B;"></h3>
+    <h2 id="rankText" style="color:#3E2A1C;"></h2>
+</div>
+
+<!-- =======================
+   TEACHER SECTION
+======================= -->
+<div id="teacherSection" class="center-box">
+    <h2 style="color:#3E2A1C;">📘 Rekod Pelajar</h2>
+    <div id="recordList" style="text-align:left; font-size:16px; color:#3E2A1C;"></div>
+</div>
+
+<!-- Confetti -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+<script>
+// ================================
+// LOGO URL（使用你上传的档案路径）
+// ================================
+const LOGO_URL = "yen logo.png";
+
+// 把 logo 注入到三个区块
+document.getElementById("logoLogin").src  = LOGO_URL;
+document.getElementById("logoSmall").src  = LOGO_URL;
+document.getElementById("logoResult").src = LOGO_URL;
+
+// ================================
+// 题库（来自 PDF，不做任何调整）
+// ================================
+const questions = [
+
+    {
+        q: "1. Bagaimana rakyat kerajaan Srivijaya menunjukkan kesetiaan mereka kepada raja?",
+        options: [
+            "Menyembah raja",
+            "Upacara sumpah",
+            "Memuliakan raja",
+            "Minum hasil kerja raja"
+        ],
+        a: "Upacara sumpah"
+    },
+
+    {
+        q: "2. Apakah maksud kawasan pengaruh?",
+        options: [
+            "Kawasan tanah yang ditakluk dan diperintah oleh raja",
+            "Kawasan di bawah perlindungan raja dan sanak saudaranya",
+            "Kawasan di mana rakyat menerima dan mengakui pemerintahan raja",
+            "Kawasan di mana rakyat menganggap raja sebagai tuhan atau wakil tuhan"
+        ],
+        a: "Kawasan di mana rakyat menerima dan mengakui pemerintahan raja"
+    },
+
+    {
+        q: "3. Apakah ciri-ciri negara bangsa di Kepulauan Melayu? (RRUW)",
+        options: [
+            "Raja",
+            "Undang-undang",
+            "Penyelesaian",
+            "Sempadan"
+        ],
+        a: "Raja"
+    },
+
+    {
+        q: "4. Siapa tonggak utama sebuah kerajaan?",
+        options: [
+            "Bangsa",
+            "Ketua",
+            "Raja",
+            "Ketua suku"
+        ],
+        a: "Raja"
+    },
+
+    {
+        q: "5. Antara yang berikut, apakah ciri-ciri negara bangsa Kesultanan Melayu Melaka?\nI. Rakyat\nII. Perlembagaan\nIII. Bangsawan\nIV. Kedaulatan",
+        options: [
+            "I dan II",
+            "I dan IV",
+            "II dan III",
+            "III dan IV"
+        ],
+        a: "I dan IV"
+    },
+
+    {
+        q: "6. Apakah perubahan yang berlaku dalam sistem pemerintahan Kesultanan Melayu Melaka selepas kedatangan Islam?",
+        options: [
+            "Penggunaan gelaran sultan",
+            "Pembatalan kelas hamba",
+            "Perluasan hubungan diplomatik",
+            "Pembatalan undang-undang adat"
+        ],
+        a: "Penggunaan gelaran sultan"
+    },
+
+    {
+        q: "7. Bagaimana pemerintahan diraja Kesultanan Melayu Melaka diperkuatkan?",
+        options: [
+            "Kesetiaan rakyat",
+            "Undang-undang bertulis",
+            "Insignia diraja",
+            "Sistem Empat Mulia"
+        ],
+        a: "Undang-undang bertulis"
+    },
+
+    {
+        q: "8. Apakah fungsi cap mohor diraja?",
+        options: [
+            "Untuk mengesahkan perintah daripada Empat Bangsawan",
+            "Untuk mengesahkan perintah daripada Sultan",
+            "Untuk menyimpan rekod pentadbiran",
+            "Untuk menyimpan rekod perniagaan"
+        ],
+        a: "Untuk mengesahkan perintah daripada Sultan"
+    },
+
+    {
+        q: "9. Bendahara memainkan peranan penting dalam pentadbiran Kesultanan Melaka. Apakah peranan itu?",
+        options: [
+            "Kutua Pentadbir",
+            "Mengutip cukai di pelabuhan",
+            "Menguruskan perbendaharaan",
+            "Mengumpul cukai di tanah milik"
+        ],
+        a: "Kutua Pentadbir"
+    },
+
+    {
+        q: "10. Bagaimana keselamatan maritim Kesultanan Melaka dijamin?",
+        options: [
+            "Laksamana sebagai ketua angkatan laut",
+            "Temenggung menjaga keselamatan rakyat",
+            "Kapten dilantik sebagai pemerintah semasa pelayaran",
+            "Malim mesti menguasai navigasi untuk memastikan keselamatan"
+        ],
+        a: "Laksamana sebagai ketua angkatan laut"
+    },
+
+    {
+        q: "11. Apakah kandungan Kod Undang-Undang Melaka dari perspektif ekonomi?",
+        options: [
+            "Amalan riba adalah dilarang",
+            "Peniaga mesti beragama Islam",
+            "Perdagangan barter dibenarkan",
+            "Wanita tidak dibenarkan berniaga"
+        ],
+        a: "Amalan riba adalah dilarang"
+    },
+
+    {
+        q: "12. Apakah peranan golongan pembesar sebagai kelas pemerintah?",
+        options: [
+            "Hadir ke acara awam",
+            "Memperkenalkan undang-undang",
+            "Bertindak sebagai perantara antara Sultan dan rakyat",
+            "Bertanggungjawab terhadap kestabilan kerajaan"
+        ],
+        a: "Bertindak sebagai perantara antara Sultan dan rakyat"
+    },
+
+    {
+        q: "13. Apakah kesan daripada hubungan timbal balik antara Sultan dan golongan bangsawan semasa Kesultanan Melaka?",
+        options: [
+            "Perkongsian kuasa berlaku",
+            "Keputusan sistem feudal",
+            "Kesejahteraan rakyat diabaikan",
+            "Memperkuatkan kerajaan"
+        ],
+        a: "Memperkuatkan kerajaan"
+    },
+
+    {
+        q: "14. Kenapa orang boleh diserang oleh tulah?",
+        options: [
+            "Mencuri hasil pertanian",
+            "Menindas satu sama lain",
+            "Mengamalkan animisme",
+            "Melanggar perintah Sultan"
+        ],
+        a: "Melanggar perintah Sultan"
+    },
+
+    {
+        q: "15. Apakah peranan rakyat dalam Kesultanan Melaka?",
+        options: [
+            "Menjadi tentera",
+            "Hadir ke acara awam",
+            "Mewujudkan perpaduan",
+            "Mengumpul hasil melalui sistem penyerahan"
+        ],
+        a: "Menjadi tentera"
+    }
+
+];
+
+// ================================
+// 音效
+// ================================
+const correctSound = new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
+const wrongSound   = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+
+// ================================
+// 全局变量
+// ================================
+let current = 0;
+let score   = 0;
+let hp      = 3;
+
+let studentName   = "";
+let studentCenter = "";
+
+// ================================
+// 登录
+// ================================
+function startQuiz() {
+    studentName   = document.getElementById("studentName").value.trim();
+    studentCenter = document.getElementById("studentCenter").value;
+
+    if (!studentName) {
+        alert("Sila isi nama pelajar.");
+        return;
+    }
+    if (!studentCenter) {
+        alert("Sila pilih pusat.");
+        return;
+    }
+
+    document.getElementById("loginSection").style.display  = "none";
+    document.getElementById("quizSection").style.display   = "block";
+    document.getElementById("resultSection").style.display = "none";
+
+    current = 0;
+    score   = 0;
+    hp      = 3;
+    updateHP();
+    loadQuestion();
+}
+
+// ================================
+// HP 显示
+// ================================
+function updateHP() {
+    document.getElementById("hpBox").innerHTML = "❤️".repeat(hp);
+}
+
+// ================================
+// 加载题目
+// ================================
+function loadQuestion() {
+    document.getElementById("nextBtn").style.display = "none";
+
+    let q = questions[current];
+    document.getElementById("questionBox").innerHTML =
+        `<b>Soalan ${current + 1} / ${questions.length}</b><br><br>${q.q}`;
+
+    let box = document.getElementById("optionsBox");
+    box.innerHTML = "";
+
+    q.options.forEach(option => {
+        let div       = document.createElement("div");
+        div.className = "option";
+        div.innerHTML = option;
+
+        div.onclick = function () {
+            selectOption(div, option, q.a);
+        };
+
+        box.appendChild(div);
+    });
+
+    document.getElementById("bar").style.width =
+        (current / questions.length) * 100 + "%";
+}
+
+// ================================
+// 选答案
+// ================================
+function selectOption(div, chosen, answer) {
+    let options = document.querySelectorAll(".option");
+    options.forEach(o => o.style.pointerEvents = "none");
+
+    if (chosen === answer) {
+        div.classList.add("correct");
+        correctSound.play();
+
+        confetti({
+            particleCount: 70,
+            spread: 60,
+            origin: { y: 0.6 }
+        });
+
+        score++;
+
+    } else {
+        div.classList.add("wrong");
+        wrongSound.play();
+        hp--;
+        updateHP();
+
+        options.forEach(o => {
+            if (o.innerHTML === answer) o.classList.add("correct");
+        });
+
+        if (hp <= 0) {
+            gameOver();
+            return;
+        }
+    }
+
+    document.getElementById("nextBtn").style.display = "block";
+}
+
+// ================================
+// 下一题
+// ================================
+function nextQuestion() {
+    current++;
+    if (current >= questions.length) {
+        finishQuiz();
+    } else {
+        loadQuestion();
+    }
+}
+
+// ================================
+// 完成测验
+// ================================
+function finishQuiz() {
+    document.getElementById("quizSection").style.display   = "none";
+    document.getElementById("resultSection").style.display = "block";
+
+    document.getElementById("scoreText").innerHTML =
+        `Markah anda: ${score} / ${questions.length}`;
+
+    let rank = "";
+    if (score >= 13)      rank = "🏆 LEGEND";
+    else if (score >= 10) rank = "🔥 PRO";
+    else if (score >= 7)  rank = "⚔️ Fighter";
+    else                  rank = "🌱 Rookie";
+
+    document.getElementById("rankText").innerHTML = rank;
+
+    confetti({
+        particleCount: 250,
+        spread: 90,
+        origin: { y: 0.6 }
+    });
+
+    saveRecord();
+}
+
+// ================================
+// Game Over（HP=0）
+// ================================
+function gameOver() {
+    document.getElementById("quizSection").style.display   = "none";
+    document.getElementById("resultSection").style.display = "block";
+
+    document.getElementById("scoreText").innerHTML =
+        `Game Over<br>Markah anda: ${score} / ${questions.length}`;
+    document.getElementById("rankText").innerHTML = "💀 Rookie";
+
+    saveRecord();
+}
+
+// ================================
+// 储存记录（localStorage）
+// ================================
+function saveRecord() {
+    let record = {
+        name:   studentName,
+        center: studentCenter,
+        score:  score,
+        total:  questions.length,
+        date:   new Date().toLocaleString()
+    };
+
+    let records = JSON.parse(localStorage.getItem("sejarah_records") || "[]");
+    records.push(record);
+    localStorage.setItem("sejarah_records", JSON.stringify(records));
+}
+
+// ================================
+// 教师模式：载入纪录
+// ================================
+function loadTeacherRecords() {
+    let list    = document.getElementById("recordList");
+    let records = JSON.parse(localStorage.getItem("sejarah_records") || "[]");
+
+    if (records.length === 0) {
+        list.innerHTML = "<p>Tiada rekod.</p>";
+        return;
+    }
+
+    let html = "<table><tr><th>Nama</th><th>Pusat</th><th>Markah</th><th>Tarikh</th></tr>";
+
+    records.forEach(r => {
+        html += `<tr>
+            <td>${r.name}</td>
+            <td>${r.center}</td>
+            <td>${r.score}/${r.total}</td>
+            <td>${r.date}</td>
+        </tr>`;
+    });
+
+    html += "</table>";
+    list.innerHTML = html;
+}
+
+// ================================
+// 根据 URL 判断是否进入教师模式
+// ================================
+if (window.location.search.includes("teacher=1")) {
+    document.getElementById("loginSection").style.display   = "none";
+    document.getElementById("quizSection").style.display    = "none";
+    document.getElementById("resultSection").style.display  = "none";
+    document.getElementById("teacherSection").style.display = "block";
+    loadTeacherRecords();
+}
+</script>
+
+</body>
+</html>
